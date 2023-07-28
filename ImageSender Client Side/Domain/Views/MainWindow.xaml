@@ -1,0 +1,14 @@
+﻿<Window x:Class="ImageSender_Client_Side.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageSender_Client_Side"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Canvas>
+        <Button Command="{Binding SelectImageCommand}" Width="200" Height="80" FontSize="20" Background="DeepSkyBlue" Canvas.Left="10" Canvas.Top="320" >Select Image</Button>
+        <Button Command="{Binding SendImageCommand}" Width="200" Height="80" FontSize="20" Background="Lime" Canvas.Right="10" Canvas.Top="320" >Send Image</Button>
+        <Image Source="{Binding Image}" Width="400" Height="300" Canvas.Left="200" Canvas.Top="25"></Image>
+    </Canvas>
+</Window>
