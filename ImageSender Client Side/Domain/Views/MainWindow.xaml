@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Canvas>
-        <Button Command="{Binding SelectImageCommand}" Width="200" Height="80" FontSize="20" Background="DeepSkyBlue" Canvas.Left="10" Canvas.Top="320" >Select Image</Button>
-        <Button Command="{Binding SendImageCommand}" Width="200" Height="80" FontSize="20" Background="Lime" Canvas.Right="10" Canvas.Top="320" >Send Image</Button>
+        <Button Command="{Binding SelectImageCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Height="80" FontSize="20" Background="DeepSkyBlue" Canvas.Left="10" Canvas.Top="320" >Select Image</Button>
+        <Button Command="{Binding SendImageCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Height="80" FontSize="20" Background="Lime" Canvas.Right="10" Canvas.Top="320" >Send Image</Button>
         <Image Source="{Binding Image}" Width="400" Height="300" Canvas.Left="210" Canvas.Top="11" HorizontalAlignment="Left" VerticalAlignment="Top"></Image>
     </Canvas>
 </Window>

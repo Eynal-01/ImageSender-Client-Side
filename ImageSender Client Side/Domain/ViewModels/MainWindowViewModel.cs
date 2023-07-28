@@ -12,6 +12,9 @@ using static System.Net.Mime.MediaTypeNames;
 using System.IO;
 using System.Windows.Markup;
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.Sockets;
+using System.Windows;
 
 namespace ImageSender_Client_Side.Domain.ViewModels
 {
@@ -33,34 +36,62 @@ namespace ImageSender_Client_Side.Domain.ViewModels
 
         public MainWindowViewModel()
         {
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
             SelectImageCommand = new RelayCommand((obj) =>
             {
-                File_send(obj);
+                File_send(Image);
+            });
+
+            SendImageCommand = new RelayCommand((obj) =>
+            {
+
+                var ipAddress = IPAddress.Parse("10.2.27.8");
+                var port = 27001;
+
+                Task.Run(() =>
+                {
+                    var ep = new IPEndPoint(ipAddress, port);
+                    try
+                    {
+                        socket.Connect(ep);
+                        if (socket.Connected)
+                        {
+                            MessageBox.Show("dewdew");
+                            var imagesend = Image;
+                            var bytes = GetJPGFromImageControl(Image);
+                            socket.Send(bytes);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                });
             });
         }
+
         public void File_send(object parametr)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.FileName = "Image"; // Default file name
-            dlg.DefaultExt = ".png"; // Default file extension
-            //dlg.Filter = "Image Files (.jpg)|*.jpg;*.jpeg;*.png;*.gif;*.tif;"; // Filter files by extension
+            dlg.FileName = "Image";
+            dlg.DefaultExt = ".png";
 
-            Nullable<bool> result = dlg.ShowDialog();
             if (dlg.ShowDialog() == true)
             {
                 Image = new BitmapImage(new Uri(dlg.FileName));
                 ImageBrush brush = new ImageBrush(Image);
-                //_MW.Background = brush;
-
-                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(Image));
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    encoder.Save(ms);
-                    Data = ms.ToArray();
-                }
                 IsOkay = true;
             }
+        }
+
+        public byte[] GetJPGFromImageControl(BitmapImage imageC)
+        {
+            MemoryStream memStream = new MemoryStream();
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(imageC));
+            encoder.Save(memStream);
+            return memStream.ToArray();
         }
     }
 }
