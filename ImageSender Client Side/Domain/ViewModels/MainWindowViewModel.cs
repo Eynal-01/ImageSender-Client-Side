@@ -34,6 +34,8 @@ namespace ImageSender_Client_Side.Domain.ViewModels
         public bool IsOkay { get; set; } = false;
         public byte[] Data { get; set; }
 
+        public bool IsConnected { get; set; } = false;
+
         public MainWindowViewModel()
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -54,8 +56,19 @@ namespace ImageSender_Client_Side.Domain.ViewModels
                     var ep = new IPEndPoint(ipAddress, port);
                     try
                     {
-                        socket.Connect(ep);
-                        if (socket.Connected)
+                        if (IsConnected == false)
+                        {
+                            socket.Connect(ep);
+
+                            if (socket.Connected)
+                            {
+                                MessageBox.Show("dewdew");
+                                var imagesend = Image;
+                                var bytes = GetJPGFromImageControl(Image);
+                                socket.Send(bytes);
+                            }
+                        }
+                        else
                         {
                             MessageBox.Show("dewdew");
                             var imagesend = Image;
