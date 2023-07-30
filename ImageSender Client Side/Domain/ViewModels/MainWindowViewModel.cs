@@ -36,9 +36,12 @@ namespace ImageSender_Client_Side.Domain.ViewModels
 
         public bool IsConnected { get; set; } = false;
 
+        [Obsolete]
         public MainWindowViewModel()
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            string hostName = Dns.GetHostName();
+            string myIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
 
             SelectImageCommand = new RelayCommand((obj) =>
             {
@@ -48,7 +51,7 @@ namespace ImageSender_Client_Side.Domain.ViewModels
             SendImageCommand = new RelayCommand((obj) =>
             {
 
-                var ipAddress = IPAddress.Parse("10.2.27.8");
+                var ipAddress = IPAddress.Parse(myIP);
                 var port = 27001;
 
                 Task.Run(() =>
@@ -58,22 +61,23 @@ namespace ImageSender_Client_Side.Domain.ViewModels
                     {
                         if (IsConnected == false)
                         {
+                            IsConnected = true;
                             socket.Connect(ep);
 
                             if (socket.Connected)
                             {
-                                MessageBox.Show("dewdew");
                                 var imagesend = Image;
                                 var bytes = GetJPGFromImageControl(Image);
                                 socket.Send(bytes);
+                                MessageBox.Show("Image sended successfully");
                             }
                         }
                         else
                         {
-                            MessageBox.Show("dewdew");
                             var imagesend = Image;
                             var bytes = GetJPGFromImageControl(Image);
                             socket.Send(bytes);
+                            MessageBox.Show("Image sended successfully");
                         }
                     }
                     catch (Exception ex)
