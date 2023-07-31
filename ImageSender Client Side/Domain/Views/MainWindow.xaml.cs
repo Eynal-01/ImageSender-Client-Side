@@ -24,8 +24,6 @@ namespace ImageSender_Client_Side
         public MainWindow()
         {
             InitializeComponent();
-            var vm = new MainWindowViewModel();
-            this.DataContext= vm;   
         }
     }
 }

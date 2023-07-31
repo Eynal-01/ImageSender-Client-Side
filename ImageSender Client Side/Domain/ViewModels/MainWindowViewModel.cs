@@ -1,17 +1,9 @@
 ﻿using ImageSender_Client_Side.Commands;
-using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using static System.Net.Mime.MediaTypeNames;
 using System.IO;
-using System.Windows.Markup;
-using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
@@ -22,6 +14,7 @@ namespace ImageSender_Client_Side.Domain.ViewModels
     {
         public RelayCommand SelectImageCommand { get; set; }
         public RelayCommand SendImageCommand { get; set; }
+        public RelayCommand ConnectServerCommand { get; set; }
 
         private BitmapImage image;
 
@@ -31,7 +24,8 @@ namespace ImageSender_Client_Side.Domain.ViewModels
             set { image = value; OnPropertyChanged(); }
         }
 
-        public bool IsOkay { get; set; } = false;
+        public Socket Socket { get; set; }
+
         public byte[] Data { get; set; }
 
         public bool IsConnected { get; set; } = false;
@@ -39,9 +33,40 @@ namespace ImageSender_Client_Side.Domain.ViewModels
         [Obsolete]
         public MainWindowViewModel()
         {
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             string hostName = Dns.GetHostName();
             string myIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
+
+            ConnectServerCommand = new RelayCommand((obj) =>
+            {
+                var ipAddress = IPAddress.Parse(myIP);
+                var port = 27001;
+                if (IsConnected == false)
+                {
+                    Task.Run(() =>
+                    {
+                        var ep = new IPEndPoint(ipAddress, port);
+                        try
+                        {
+                            IsConnected = true;
+                            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                            Socket.Connect(ep);
+
+                            if (Socket.Connected)
+                            {
+                                MessageBox.Show("Connected successfully");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("Already connected");
+                }
+            });
 
             SelectImageCommand = new RelayCommand((obj) =>
             {
@@ -50,41 +75,21 @@ namespace ImageSender_Client_Side.Domain.ViewModels
 
             SendImageCommand = new RelayCommand((obj) =>
             {
-
-                var ipAddress = IPAddress.Parse(myIP);
-                var port = 27001;
-
-                Task.Run(() =>
+                if (IsConnected == true)
                 {
-                    var ep = new IPEndPoint(ipAddress, port);
+
                     try
                     {
-                        if (IsConnected == false)
-                        {
-                            IsConnected = true;
-                            socket.Connect(ep);
-
-                            if (socket.Connected)
-                            {
-                                var imagesend = Image;
-                                var bytes = GetJPGFromImageControl(Image);
-                                socket.Send(bytes);
-                                MessageBox.Show("Image sended successfully");
-                            }
-                        }
-                        else
-                        {
-                            var imagesend = Image;
-                            var bytes = GetJPGFromImageControl(Image);
-                            socket.Send(bytes);
-                            MessageBox.Show("Image sended successfully");
-                        }
+                        var imagesend = Image;
+                        var bytes = GetJPGFromImageControl(Image);
+                        Socket.Send(bytes);
+                        MessageBox.Show("Image sended successfully");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                     }
-                });
+                }
             });
         }
 
@@ -98,7 +103,6 @@ namespace ImageSender_Client_Side.Domain.ViewModels
             {
                 Image = new BitmapImage(new Uri(dlg.FileName));
                 ImageBrush brush = new ImageBrush(Image);
-                IsOkay = true;
             }
         }
 
