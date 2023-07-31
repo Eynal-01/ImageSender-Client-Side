@@ -72,7 +72,7 @@ namespace ImageSender_Client_Side.Domain.ViewModels
             {
                 File_send(Image);
             });
-
+            //
             SendImageCommand = new RelayCommand((obj) =>
             {
                 if (IsConnected == true)
